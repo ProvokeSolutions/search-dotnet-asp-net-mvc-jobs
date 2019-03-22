@@ -2,12 +2,7 @@
 <script type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
 
 <script>
-    var lat = 40.736224;
-    var lon = -73.992511;
-    var pinLayer, infoboxLayer;
-    var pinInfobox = null;
-    var infoboxLayer = new Microsoft.Maps.EntityCollection();
-    var pinLayer = new Microsoft.Maps.EntityCollection();
+  
 
     $(function () {
         LookUp();
@@ -15,7 +10,7 @@
     
     function LookUp() {
         // Get center of map to use to score the search results
-        var query_string = {};
+      
         var query = window.location.search.substring(1);
         var vars = query.split("&");
         if (vars.length > 0) {
@@ -54,52 +49,21 @@
         var imgCounter = 0;
         var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         ];
-
-        $("#job_id").html(data.Result.job_id);
-        $("#work_location").html(data.Result.work_location);
-        $("#business_title").html(data.Result.business_title);
-        $("#civil_service_title").html(data.Result.civil_service_title);
-        
-
-        var salary = '$' + data.Result.salary_range_from.toLocaleString();
-        if (data.Result.salary_range_from != data.Result.salary_range_to)
-            salary += ' to $' + data.Result.salary_range_to.toLocaleString();
-        salary += ' ' + data.Result.salary_frequency;
-        $("#salary").html(salary);
-
-        $("#agency").html(data.Result.agency);
-        $("#division").html(data.Result.division_work_unit);
-        $("#hours_per_shift").html(data.Result.hours_per_shift);
-        $("#level").html(data.Result.level);
-        $("#num_of_positions").html(data.Result.num_of_positions);
-        $("#posting_type").html(data.Result.posting_type);
-        
-        $("#job_description").html(CleanText(data.Result.job_description));
-
-        $("#minimum_qual_requirements").html(CleanText(data.Result.minimum_qual_requirements));
-        $("#preferred_skills").html(CleanText(data.Result.preferred_skills));
-        $("#residency_requirement").html(CleanText(data.Result.residency_requirement));
-        $("#to_apply").html(CleanText(data.Result.to_apply));
-
-        var postingDate = data.Result.posting_date;
-        var date = new Date(parseInt(postingDate.substr(6)));
-        $("#dateDiv").html('<div class="date">' + date.getDay() + ' <span>' + monthNames[date.getMonth()] + '</span></div>');
-
-        $("#business_title_main").html(data.Result.business_title);
-        $("#work_location_main").html(data.Result.work_location);
-
-        map = new Microsoft.Maps.Map(document.getElementById("jobs-single-page-map"),
-        {
-            credentials: "Ag6emoVznJlat4hHnw7nrYGDlQ43ZjXAY7e-8R4bu8ZC7K1d8ORGhZMBkVu3KAVq",
-            center: new Microsoft.Maps.Location(data.Result.geo_location.Latitude, data.Result.geo_location.Longitude),
-            zoom: 17
-        });
-
-        map.setView({ mapTypeId: Microsoft.Maps.MapTypeId.birdseye });
-        var latLon = new Microsoft.Maps.Location(data.Result.geo_location.Latitude, data.Result.geo_location.Longitude);
-        var pin = new Microsoft.Maps.Pushpin(latLon, { text: 1 });
-        map.entities.push(pin); //add pushpin to pinLayer
-
+        //"id", "title", "description", "type", "source", 
+       // "url", "people", "organizations", "locations", "keyphrases",
+        //    "language"
+        $("#job_id").html(data.Result.id);
+        $("#work_location").html(data.Result.locations);
+        $("#business_title").html(data.Result.title);
+        $("#civil_service_title").html(data.Result.description);
+        $("#agency").html(data.Result.source);
+        $("#division").html(data.Result.people);
+        $("#hours_per_shift").html(data.organizations);
+        $("#level").html(data.Result.url);
+        $("#num_of_positions").html(data.Result.keyphrases);
+        $("#posting_type").html(data.Result.language);
+        $("#business_title_main").html(data.Result.title);
+        $("#work_location_main").html(data.Result.locations);
     }
 
 
@@ -136,11 +100,6 @@
                                     <tr>
                                         <td>Title</td>
                                         <td id="civil_service_title">-</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>Salary</td>
-                                        <td id="salary">-</td>
                                     </tr>
 
                                     <tr>

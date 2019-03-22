@@ -12,7 +12,7 @@ namespace NYCJobsWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private JobsSearch _jobsSearch = new JobsSearch();
+        private DataSearch _datastoreSearch = new DataSearch();
 
         // GET: Home
         public ActionResult Index()
@@ -25,31 +25,18 @@ namespace NYCJobsWeb.Controllers
             return View();
         }
 
-        public ActionResult Search(string q = "", string businessTitleFacet = "", string postingTypeFacet = "", string salaryRangeFacet = "",
-            string sortType = "", double lat = 40.736224, double lon = -73.99251, int currentPage = 0, int zipCode = 10001,
-            int maxDistance = 0)
+        public ActionResult Search(string q = "", string typeFacet = "", string sourceFacet = "", string peopleFacet = "",
+            string organizationsFacet = "", string locationsFacet = "", string keyphrasesFacet = "", string languageFacet = "",
+            string sortType = "", int currentPage = 0)
         {
             // If blank search, assume they want to search everything
             if (string.IsNullOrWhiteSpace(q))
                 q = "*";
 
-            string maxDistanceLat = string.Empty;
-            string maxDistanceLon = string.Empty;
-
-            //Do a search of the zip code index to get lat / long of this location
-            //Eventually this should be extended to search beyond just zip (i.e. city)
-            if (maxDistance > 0)
-            {
-                var zipReponse = _jobsSearch.SearchZip(zipCode.ToString());
-                foreach (var result in zipReponse.Results)
-                {
-                    var doc = (dynamic)result.Document;
-                    maxDistanceLat = Convert.ToString(doc["geo_location"].Latitude, CultureInfo.InvariantCulture);
-                    maxDistanceLon = Convert.ToString(doc["geo_location"].Longitude, CultureInfo.InvariantCulture);
-                }
-            }
-
-            var response = _jobsSearch.Search(q, businessTitleFacet, postingTypeFacet, salaryRangeFacet, sortType, lat, lon, currentPage, maxDistance, maxDistanceLat, maxDistanceLon);
+           
+            var response = _datastoreSearch.Search(
+                q, typeFacet, sourceFacet, peopleFacet, organizationsFacet, locationsFacet, keyphrasesFacet,
+                languageFacet, sortType, currentPage);
             return new JsonResult
             {
                 // ***************************************************************************************************************************
@@ -57,7 +44,7 @@ namespace NYCJobsWeb.Controllers
                 // ***************************************************************************************************************************
 
                 JsonRequestBehavior = JsonRequestBehavior.AllowGet,
-                Data = new NYCJob() { Results = response.Results, Facets = response.Facets, Count = Convert.ToInt32(response.Count) }
+                Data = new DataItem() { Results = response.Results, Facets = response.Facets, Count = Convert.ToInt32(response.Count) }
             };
         }
 
@@ -65,7 +52,7 @@ namespace NYCJobsWeb.Controllers
         public ActionResult Suggest(string term, bool fuzzy = true)
         {
             // Call suggest query and return results
-            var response = _jobsSearch.Suggest(term, fuzzy);
+            var response = _datastoreSearch.Suggest(term, fuzzy);
             List<string> suggestions = new List<string>();
             foreach (var result in response.Results)
             {
@@ -88,7 +75,7 @@ namespace NYCJobsWeb.Controllers
             // Take a key ID and do a lookup to get the job details
             if (id != null)
             {
-                var response = _jobsSearch.LookUp(id);
+                var response = _datastoreSearch.LookUp(id);
                 return new JsonResult
                 {
                     JsonRequestBehavior = JsonRequestBehavior.AllowGet,

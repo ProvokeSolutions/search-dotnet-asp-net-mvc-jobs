@@ -988,10 +988,10 @@ span.jobs-count {color: #000;}
 	text-transform: none;
 }
 .jobs-item .title a {
-	color: inherit;
+	color: #1DB490;
 	text-decoration: none;
 }
-.jobs-item .title a:hover {color: #21bbee;}
+.jobs-item .title a:hover {color: #004f3d;}
 .jobs-item .meta {
 	display: inline-block;
 	color: #7a7a7a;

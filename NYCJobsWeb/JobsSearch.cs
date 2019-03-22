@@ -10,17 +10,16 @@ using System.Web;
 
 namespace NYCJobsWeb
 {
-    public class JobsSearch
+    public class DataSearch
     {
         private static SearchServiceClient _searchClient;
         private static ISearchIndexClient _indexClient;
-        private static string IndexName = "nycjobs";
-        private static ISearchIndexClient _indexZipClient;
-        private static string IndexZipCodes = "zipcodes";
+        private static string IndexName = ConfigurationManager.AppSettings["SearchIndexName"];
+        private static string SearchSuggestor = ConfigurationManager.AppSettings["SearchSuggestor"];
 
         public static string errorMessage;
 
-        static JobsSearch()
+        static DataSearch()
         {
             try
             {
@@ -30,7 +29,6 @@ namespace NYCJobsWeb
                 // Create an HTTP reference to the catalog index
                 _searchClient = new SearchServiceClient(searchServiceName, new SearchCredentials(apiKey));
                 _indexClient = _searchClient.Indexes.GetClient(IndexName);
-                _indexZipClient = _searchClient.Indexes.GetClient(IndexZipCodes);
 
             }
             catch (Exception e)
@@ -39,8 +37,9 @@ namespace NYCJobsWeb
             }
         }
 
-        public DocumentSearchResult Search(string searchText, string businessTitleFacet, string postingTypeFacet, string salaryRangeFacet,
-            string sortType, double lat, double lon, int currentPage, int maxDistance, string maxDistanceLat, string maxDistanceLon)
+        public DocumentSearchResult Search(string searchText, string typeFacet, string sourceFacet, string peopleFacet,
+            string organizationsFacet, string locationsFacet, string keyphrasesFacet, string languageFacet,
+            string sortType, int currentPage)
         {
             // Execute search based on query string
             try
@@ -49,64 +48,85 @@ namespace NYCJobsWeb
                 {
                     SearchMode = SearchMode.Any,
                     Top = 10,
-                    Skip = currentPage - 1,
+                   // Skip = currentPage - 1,
+                    Skip = 0,
                     // Limit results
-                    Select = new List<String>() {"id", "agency", "posting_type", "num_of_positions", "business_title", 
-                        "salary_range_from", "salary_range_to", "salary_frequency", "work_location", "job_description",
-                        "posting_date", "geo_location", "tags"},
+                    Select = new List<String>() {"id", "title", "description", "type", "source", 
+                        "url", "people", "organizations", "locations", "keyphrases",
+                        "language"},
                     // Add count
                     IncludeTotalResultCount = true,
                     // Add search highlights
-                    HighlightFields = new List<String>() { "job_description" },
+                    HighlightFields = new List<String>() { "description" },
                     HighlightPreTag = "<b>",
                     HighlightPostTag = "</b>",
                     // Add facets
-                    Facets = new List<String>() { "business_title", "posting_type", "level", "salary_range_from,interval:50000" },
+                    Facets = new List<String>() { "type", "source","people", "organizations", "locations", "keyphrases", "language" },
                 };
                 // Define the sort type
-                if (sortType == "featured")
-                {
-                    sp.ScoringProfile = "jobsScoringFeatured";      // Use a scoring profile
-                    sp.ScoringParameters = new List<ScoringParameter>();
-                    sp.ScoringParameters.Add(new ScoringParameter("featuredParam", new[] { "featured" }));
-                    sp.ScoringParameters.Add(new ScoringParameter("mapCenterParam", GeographyPoint.Create(lon, lat)));
-                }
-                else if (sortType == "salaryDesc")
-                    sp.OrderBy = new List<String>() { "salary_range_from desc" };
-                else if (sortType == "salaryIncr")
-                    sp.OrderBy = new List<String>() { "salary_range_from" };
-                else if (sortType == "mostRecent")
-                    sp.OrderBy = new List<String>() { "posting_date desc" };
+                if (sortType == "type")
+                    sp.OrderBy = new List<String>() { "type desc" };
+                else if (sortType == "source")
+                    sp.OrderBy = new List<String>() { "source desc" };
 
 
                 // Add filtering
                 string filter = null;
-                if (businessTitleFacet != "")
-                    filter = "business_title eq '" + businessTitleFacet + "'";
-                if (postingTypeFacet != "")
+                if (typeFacet != "")
+                    filter = "type eq '" + typeFacet + "'";
+                if (sourceFacet != "")
                 {
                     if (filter != null)
                         filter += " and ";
-                    filter += "posting_type eq '" + postingTypeFacet + "'";
+                    filter += "source eq '" + sourceFacet + "'";
 
                 }
-                if (salaryRangeFacet != "")
+                if (peopleFacet != "")
                 {
                     if (filter != null)
                         filter += " and ";
-                    filter += "salary_range_from ge " + salaryRangeFacet + " and salary_range_from lt " + (Convert.ToInt32(salaryRangeFacet) + 50000).ToString();
+                    filter += "people eq '" + peopleFacet + "'";
+
+                }
+                if (organizationsFacet != "")
+                {
+                    if (filter != null)
+                        filter += " and ";
+                    filter += "organizations eq '" + organizationsFacet + "'";
+
                 }
 
-                if (maxDistance > 0)
+                if (locationsFacet != "")
                 {
                     if (filter != null)
                         filter += " and ";
-                    filter += "geo.distance(geo_location, geography'POINT(" + maxDistanceLon + " " + maxDistanceLat + ")') le " + maxDistance.ToString();
+                    filter += "locations eq '" + locationsFacet + "'";
+
                 }
+
+                if (keyphrasesFacet != "")
+                {
+                    if (filter != null)
+                        filter += " and ";
+                    filter += "keyphrases eq '" + keyphrasesFacet + "'";
+
+                }
+
+                if (languageFacet != "")
+                {
+                    if (filter != null)
+                        filter += " and ";
+                    filter += "language eq '" + languageFacet + "'";
+
+                }
+
+
+
 
                 sp.Filter = filter;
-
-                return _indexClient.Documents.Search(searchText, sp);
+                
+                DocumentSearchResult  results = _indexClient.Documents.Search(searchText, sp);
+                return results;
             }
             catch (Exception ex)
             {
@@ -115,27 +135,10 @@ namespace NYCJobsWeb
             return null;
         }
 
-        public DocumentSearchResult SearchZip(string zipCode)
-        {
-            // Execute search based on query string
-            try
-            {
-                SearchParameters sp = new SearchParameters()
-                {
-                    SearchMode = SearchMode.All,
-                    Top = 1,
-                };
-                return _indexZipClient.Documents.Search(zipCode, sp);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error querying index: {0}\r\n", ex.Message.ToString());
-            }
-            return null;
-        }
 
         public DocumentSuggestResult Suggest(string searchText, bool fuzzy)
         {
+            string suggestorName = ConfigurationManager.AppSettings["SearchSuggestor"];
             // Execute search based on query string
             try
             {
@@ -145,7 +148,7 @@ namespace NYCJobsWeb
                     Top = 8
                 };
 
-                return _indexClient.Documents.Suggest(searchText, "sg", sp);
+                return _indexClient.Documents.Suggest(searchText, suggestorName, sp);
             }
             catch (Exception ex)
             {

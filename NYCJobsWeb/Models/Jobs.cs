@@ -6,7 +6,7 @@ using System.Web;
 
 namespace NYCJobsWeb.Models
 {
-    public class NYCJob
+    public class DataItem
     {
         public FacetResults Facets { get; set; }
         public IList<SearchResult> Results { get; set; }
