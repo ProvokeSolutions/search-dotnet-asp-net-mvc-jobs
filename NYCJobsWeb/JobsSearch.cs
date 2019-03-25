@@ -48,7 +48,7 @@ namespace NYCJobsWeb
                 {
                     SearchMode = SearchMode.Any,
                     Top = 10,
-                   // Skip = currentPage - 1,
+                    // Skip = currentPage - 1,
                     Skip = 0,
                     // Limit results
                     Select = new List<String>() {"id", "title", "description", "type", "source", 
@@ -72,31 +72,40 @@ namespace NYCJobsWeb
 
                 // Add filtering
                 string filter = null;
-                if (typeFacet != "")
+
+                if (!string.IsNullOrEmpty(typeFacet))
+                {
+                    //if (filter != null)
+                    //    filter += " and ";
                     filter = "type eq '" + typeFacet + "'";
-                if (sourceFacet != "")
+                    //filter += "type/any(s: s eq '" + typeFacet + "')";
+                }
+                if (!string.IsNullOrEmpty(sourceFacet))
                 {
                     if (filter != null)
                         filter += " and ";
                     filter += "source eq '" + sourceFacet + "'";
+                   // filter += "source/any(s: s eq '" + sourceFacet + "')";
 
                 }
-                if (peopleFacet != "")
+                if (!string.IsNullOrEmpty(peopleFacet))
                 {
                     if (filter != null)
                         filter += " and ";
-                    filter += "people eq '" + peopleFacet + "'";
+                  //  filter += "people eq '" + peopleFacet + "'";
+                    filter += "people/any(p: p eq '" + peopleFacet + "')";
 
                 }
-                if (organizationsFacet != "")
+                if (!string.IsNullOrEmpty(organizationsFacet))
                 {
                     if (filter != null)
                         filter += " and ";
-                    filter += "organizations eq '" + organizationsFacet + "'";
+                    filter += "organizations/any(o: o eq '" + organizationsFacet + "')";
+                    //filter += "organizations eq '" + organizationsFacet + "'";
 
                 }
 
-                if (locationsFacet != "")
+                if (!string.IsNullOrEmpty(locationsFacet))
                 {
                     if (filter != null)
                         filter += " and ";
@@ -104,19 +113,21 @@ namespace NYCJobsWeb
 
                 }
 
-                if (keyphrasesFacet != "")
+                if (!string.IsNullOrEmpty(keyphrasesFacet))
                 {
+                    //keyphrases/any(p: p eq 'bug')
+
                     if (filter != null)
                         filter += " and ";
-                    filter += "keyphrases eq '" + keyphrasesFacet + "'";
+                    filter += "keyphrases/any(k: k eq '" + keyphrasesFacet + "')";
 
                 }
 
-                if (languageFacet != "")
+                if (!string.IsNullOrEmpty(languageFacet))
                 {
                     if (filter != null)
                         filter += " and ";
-                    filter += "language eq '" + languageFacet + "'";
+                    filter += "language/any(l: l eq '" + languageFacet + "')";
 
                 }
 

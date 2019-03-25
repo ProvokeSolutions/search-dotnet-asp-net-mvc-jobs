@@ -24,16 +24,53 @@ namespace NYCJobsWeb.Controllers
         {
             return View();
         }
-
-        public ActionResult Search(string q = "", string typeFacet = "", string sourceFacet = "", string peopleFacet = "",
-            string organizationsFacet = "", string locationsFacet = "", string keyphrasesFacet = "", string languageFacet = "",
-            string sortType = "", int currentPage = 0)
+        /// <summary>
+        ///             {
+            //    q: q,
+            //    typeFacet: typeFacet,
+            //    sourceFacet: sourceFacet,
+            //    peopleFacet: peopleFacet,
+            //    sortType: sortType,
+            //    organizationsFacet: organizationsFacet,
+            //    locationsFacet: locationsFacet,
+            //    currentPage: currentPage,
+            //    keyphrasesFacet: keyphrasesFacet,
+            //    languageFacet: languageFacet
+            //}
+        /// </summary>
+        /// <param name="q"></param>
+        /// <param name="typeFacet"></param>
+        /// <param name="sourceFacet"></param>
+        /// <param name="peopleFacet"></param>
+        /// <param name="organizationsFacet"></param>
+        /// <param name="locationsFacet"></param>
+        /// <param name="keyphrasesFacet"></param>
+        /// <param name="languageFacet"></param>
+        /// <param name="sortType"></param>
+        /// <param name="currentPage"></param>
+        /// <returns></returns>
+        public ActionResult Search(
+            string q = "", 
+            string typeFacet = "", 
+            string sourceFacet = "", 
+            string peopleFacet = "",
+            string sortType = "",
+            string organizationsFacet = "", 
+            string locationsFacet = "",
+            int currentPage = 0,
+            string keyphrasesFacet = "", 
+            string languageFacet = ""
+            )
         {
             // If blank search, assume they want to search everything
             if (string.IsNullOrWhiteSpace(q))
                 q = "*";
 
-           
+            /*
+            (string searchText, string typeFacet, string sourceFacet, string peopleFacet,
+             string organizationsFacet, string locationsFacet, string keyphrasesFacet, string languageFacet,
+             string sortType, int currentPage)
+            */
             var response = _datastoreSearch.Search(
                 q, typeFacet, sourceFacet, peopleFacet, organizationsFacet, locationsFacet, keyphrasesFacet,
                 languageFacet, sortType, currentPage);

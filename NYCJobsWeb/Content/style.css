@@ -412,12 +412,13 @@ fieldset[disabled] .checkbox-inline {
 }
 
 /* Header Page Title */
-#header .header-nav {
-	background: #555555;
-	color: #ffffff;
-	position: relative;
-	padding: 17px 0;
-}
+    #header .header-nav {
+        background: #ffffff;
+        color: #555555;
+        position: relative;
+        padding: 17px 0;
+        border-bottom: 2px solid #004f3d;
+    }
 #header .header-nav a {color: inherit;}
 #header .header-nav a:hover {text-decoration: underline;}
 #header .logo-wrapper {
@@ -426,7 +427,12 @@ fieldset[disabled] .checkbox-inline {
 }
 #header .logo-wrapper .logo {
 }
-#header .logo-wrapper .logo a {margin-right: 50px;}
+    #header .logo-wrapper img{
+        max-width :300px
+    }
+    #header .logo-wrapper .logo a {
+        margin-right: 50px;
+    }
 #header .header-nav h1 {
 	margin: 0;
 	font-size: 24px;

@@ -24,11 +24,9 @@
 
     var typeFacet, sourceFacet, peopleFacet, organizationsFacet, locationsFacet, keyphrasesFacet, languageFacet;
 
-    var businessTitleFacet, postingTypeFacet, salaryRangeFacet, sortType, currentPage, zipCode, maxDistance;
+    var sortType, currentPage;
     currentPage = 1;
-    var map = null;
-    var lat = 40.736224;
-    var lon = -73.992511;
+  
     var pinLayer, infoboxLayer;
     var pinInfobox = null;
     var infoboxLayer;
@@ -53,10 +51,13 @@
                 languageFacet: languageFacet
             },
             function (data) {
-                UpdateBusinessTitleFacets(data.Facets.type);
-                UpdatePostingTypeFacets(data.Facets.source);
-                UpdateSalaryRangeFacets(data.Facets.keyphrases);
+                UpdateTypeFacets(data.Facets.type);
+                UpdateSourceTypeFacets(data.Facets.source);
+                UpdateKeyPhraseFacets(data.Facets.keyphrases);
                 UpdateLanguageFacets(data.Facets.language);
+                UpdatePeopleFacets(data.Facets.people);
+                UpdateOrganizationsFacets(data.Facets.organizations);
+                UpdateLocationsFacets(data.Facets.locations);
                 UpdateJobDetails(data.Results);
                 UpdatePagination(data.Count);            
                 UpdateFilterReset();
@@ -67,29 +68,43 @@
     function UpdateFilterReset() {
         // This allows users to remove filters
         var htmlString = '';
-        if ((businessTitleFacet != '') || (postingTypeFacet != '') || (salaryRangeFacet != '')) {
+
+        if ((typeFacet) || (sourceFacet) || (peopleFacet) || (organizationsFacet) || (keyphrasesFacet) || (locationsFacet) || (languageFacet)) {
             htmlString += '<b>Current Filters:</b><br>';
-            if (businessTitleFacet != '')
-                htmlString += businessTitleFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'businessTitleFacet\')">X</a>]<br>';
-            if (postingTypeFacet != '')
-                htmlString += postingTypeFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'postingTypeFacet\')">X</a>]<br>';
-            if (salaryRangeFacet != '') {
-                var lowRange = parseInt(salaryRangeFacet);
-                var highRange = lowRange + 49999;
-                htmlString += '$' + lowRange.toLocaleString() + ' - $' + highRange.toLocaleString() + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'salaryRangeFacet\')">X</a>]<br>';
-            }
+            if (typeFacet)
+                htmlString += typeFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'typeFacet\')">X</a>]<br>';
+            if (sourceFacet )
+                htmlString += sourceFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'sourceFacet\')">X</a>]<br>';
+            if (organizationsFacet )
+                htmlString += organizationsFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'organizationsFacet\')">X</a>]<br>';
+            if (keyphrasesFacet)
+                htmlString += keyphrasesFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'keyphrasesFacet\')">X</a>]<br>';
+            if (peopleFacet)
+                htmlString += peopleFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'peopleFacet\')">X</a>]<br>';
+            if (locationsFacet)
+                htmlString += locationsFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'locationFacet\')">X</a>]<br>';
+            if (languageFacet)
+                htmlString += languageFacet + ' [<a href="javascript:void(0)" onclick="RemoveFacet(\'languageFacet\')">X</a>]<br>';          
         }
         $("#filterReset").html(htmlString);
     }
 
     function RemoveFacet(facet) {
         // Remove a facet
-        if (facet == "businessTitleFacet")
-            businessTitleFacet = '';
-        if (facet == "postingTypeFacet")
-            postingTypeFacet = '';
-        if (facet == "salaryRangeFacet")
-            salaryRangeFacet = '';
+        if (facet == "typeFacet")
+            typeFacet = '';
+        if (facet == "sourceFacet")
+            sourceFacet = '';
+        if (facet == "peopleFacet")
+            peopleFacet = '';
+        if (facet == "organizationsFacet")
+            organizationsFacet = '';
+        if (facet == "keyphrasesFacet")
+            keyphrasesFacet = '';
+        if (facet == "languageFacet")
+            languageFacet = '';
+        if (facet == "locationsFacet")
+            locationsFacet = '';
 
         Search();
     }
@@ -132,14 +147,32 @@
         currentPage = page;
         Search();
     }
-
-    function UpdateBusinessTitleFacets(data) {
+    ///Item Type
+    function UpdateTypeFacets(data) {
         var facetResultsHTML = '';
         for (var i = 0; i < data.length; i++) {
-            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChooseBusinessTitleFacet(\'' + data[i].Value + '\');">' + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
+            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChooseItemTypeFacet(\'' + data[i].Value + '\');">' + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
         }
 
-        $("#business_title_facets").html(facetResultsHTML);
+        $("#type_facets").html(facetResultsHTML);
+    }
+
+    function ChooseItemTypeFacet(facet) {
+        typeFacet = facet;
+        Search();
+    }
+    ///KeyPhrase
+    function UpdateKeyPhraseFacets(data) {
+        var facetResultsHTML = '';
+        for (var i = 0; i < data.length; i++) {
+            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChooseKeyPhrasesFacet(\'' + data[i].Value + '\');">' + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
+        }
+
+        $("#keyphrases_facets").html(facetResultsHTML);
+    }
+    function ChooseKeyPhrasesFacet(facet) {
+        keyphrasesFacet = facet;
+        Search();
     }
 
 
@@ -152,41 +185,69 @@
         $("#language_facets").html(facetResultsHTML);
     }
 
-    function ChooseBusinessTitleFacet(facet) {
-        businessTitleFacet = facet;
+    function ChooseLanguageFacet(facet) {
+        languageFacet = facet;
         Search();
     }
 
-
-    function UpdatePostingTypeFacets(data) {
+    function UpdateLocationsFacets(data) {
         var facetResultsHTML = '';
         for (var i = 0; i < data.length; i++) {
-            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChoosePostingTypeFacet(\'' + data[i].Value + '\');">' + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
+            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChooseLocationFacet(\'' + data[i].Value + '\');">' + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
         }
 
-        $("#posting_type_facets").html(facetResultsHTML);
+        $("#locations_facets").html(facetResultsHTML);
     }
 
-    function ChoosePostingTypeFacet(facet) {
-        postingTypeFacet = facet;
+    function ChooseLocationFacet(facet) {
+        locationsFacet = facet;
         Search();
     }
 
-    function UpdateSalaryRangeFacets(data) {
+    function UpdateSourceTypeFacets(data) {
         var facetResultsHTML = '';
         for (var i = 0; i < data.length; i++) {
-           
-
-            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChooseSalaryRangeFacet(\'' + data[i].Value + '\');">'  + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
+            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChooseSourceTypeFacet(\'' + data[i].Value + '\');">' + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
         }
 
-        $("#salary_range_facets").html(facetResultsHTML);
+        $("#source_facets").html(facetResultsHTML);
     }
 
-    function ChooseSalaryRangeFacet(facet) {
-        salaryRangeFacet = facet;
+    function ChooseSourceTypeFacet(facet) {
+        sourceFacet = facet;
         Search();
     }
+
+    function UpdateOrganizationsFacets(data) {
+        var facetResultsHTML = '';
+        for (var i = 0; i < data.length; i++) {
+            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChooseOrganizationsFacet(\'' + data[i].Value + '\');">' + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
+        }
+
+        $("#organizations_facets").html(facetResultsHTML);
+    }
+
+    function ChooseOrganizationsFacet(facet) {
+        organizationsFacet = facet;
+        Search();
+    }
+
+
+    function UpdatePeopleFacets(data) {
+        var facetResultsHTML = '';
+        for (var i = 0; i < data.length; i++) {
+            facetResultsHTML += '<li><a href="javascript:void(0)" onclick="ChoosePeopleFacet(\'' + data[i].Value + '\');">' + data[i].Value + ' (' + data[i].Count + ')</span></a></li>';
+        }
+
+        $("#people_facets").html(facetResultsHTML);
+    }
+
+    function ChoosePeopleFacet(facet) {
+        peopleFacet = facet;
+        Search();
+    }
+
+
 
     function setSortType() {
         sortType = $("#cmbSortType").val();
@@ -259,13 +320,19 @@
                         <p id="filterReset"></p>
                         <div class="widget-content">
                             <h6 id="businessTitleFacetTitle">Content Type</h6>
-                            <ul class="filter-list" id="business_title_facets"></ul>
-                            <h6>Conent Source</h6>
-                            <ul class="filter-list" id="posting_type_facets"></ul>
+                            <ul class="filter-list" id="type_facets"></ul>
+                            <h6>Content Source</h6>
+                            <ul class="filter-list" id="source_facets"></ul>
+                            <h6>Key Phrases</h6>
+                            <ul class="filter-list" id="keyphrases_facets"></ul>
+                            <h6>Organizations</h6>
+                            <ul class="filter-list" id="organizations_facets"></ul>
+                            <h6>People</h6>
+                            <ul class="filter-list" id="people_facets"></ul>
+                            <h6>Locations</h6>
+                            <ul class="filter-list" id="locations_facets"></ul>
                             <h6>Languages</h6>
                             <ul class="filter-list" id="language_facets"></ul>
-                            <h6>Key Phrases</h6>
-                            <ul class="filter-list" id="salary_range_facets"></ul>
                         </div>
                     </div>
                 </div>
